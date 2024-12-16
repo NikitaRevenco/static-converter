@@ -50,10 +50,6 @@ export default function Home() {
         json = TOML.parse(code);
         break;
       }
-      case "xml": {
-        json = XML.parse(code);
-        break;
-      }
       case "yaml": {
         json = YAML.parse(code);
         break;
