@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverComponentsExternalPackages: ["vscode-oniguruma", "shiki"],
+  output: "export",
+  basePath: "/static-converter",
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
