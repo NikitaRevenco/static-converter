@@ -2,7 +2,25 @@
 
 import YAML from "yaml";
 import TOML from "smol-toml";
-import CSV from "json-2-csv";
+import { csv2json, json2csv } from "json-2-csv";
+
+type Parser = (a: string) => object;
+type Stringifier = (c: unknown) => string;
+
+const CSV = {
+  parse: csv2json,
+  stringify: json2csv as Stringifier,
+};
+
+const converters: Record<string, { parse: Parser; stringify: Stringifier }> = {
+  YAML,
+  TOML,
+  CSV,
+  JSON: {
+    parse: JSON.parse,
+    stringify: (c: unknown) => JSON.stringify(c, null, 2),
+  },
+};
 
 import {
   Select,
@@ -36,44 +54,9 @@ export default function Home() {
   let text = "";
 
   try {
-    let json;
-    switch (convertFrom) {
-      case "csv": {
-        json = CSV.csv2json(code);
-        break;
-      }
-      case "json": {
-        json = JSON.parse(code);
-        break;
-      }
-      case "toml": {
-        json = TOML.parse(code);
-        break;
-      }
-      case "yaml": {
-        json = YAML.parse(code);
-        break;
-      }
-    }
+    const json = converters[convertFrom].parse(code) as object;
 
-    switch (convertTo) {
-      case "csv": {
-        text = CSV.json2csv(json);
-        break;
-      }
-      case "json": {
-        text = JSON.stringify(json, null, 2);
-        break;
-      }
-      case "toml": {
-        text = TOML.stringify(json);
-        break;
-      }
-      case "yaml": {
-        text = YAML.stringify(json);
-        break;
-      }
-    }
+    text = converters[convertTo].stringify(json) as string;
   } catch (err) {
     text = (err as SyntaxError).message;
   }
