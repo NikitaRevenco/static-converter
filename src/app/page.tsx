@@ -1,8 +1,7 @@
 "use client";
 
-import YAML from "json-to-pretty-yaml";
+import YAML from "yaml";
 import TOML from "smol-toml";
-import XML from "jstoxml";
 import CSV from "json-2-csv";
 
 import {
@@ -52,7 +51,7 @@ export default function Home() {
         break;
       }
       case "xml": {
-        json = XML.fromXML(code);
+        json = XML.parse(code);
         break;
       }
       case "yaml": {
@@ -72,10 +71,6 @@ export default function Home() {
       }
       case "toml": {
         text = TOML.stringify(json);
-        break;
-      }
-      case "xml": {
-        text = XML.toXML(json, { indent: "  " });
         break;
       }
       case "yaml": {
