@@ -1,27 +1,5 @@
 "use client";
 
-import YAML from "yaml";
-import TOML from "smol-toml";
-import { csv2json, json2csv } from "json-2-csv";
-
-type Parser = (a: string) => object;
-type Stringifier = (c: unknown) => string;
-
-const CSV = {
-  parse: csv2json,
-  stringify: json2csv as Stringifier,
-};
-
-const converters: Record<string, { parse: Parser; stringify: Stringifier }> = {
-  YAML,
-  TOML,
-  CSV,
-  JSON: {
-    parse: JSON.parse,
-    stringify: (c: unknown) => JSON.stringify(c, null, 2),
-  },
-};
-
 import {
   Select,
   SelectContent,
@@ -29,12 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { converters } from "@/lib/converters";
 
 import { useState } from "react";
 
 export default function Home() {
-  const [convertTo, setConvertTo] = useState("json");
-  const [convertFrom, setConvertFrom] = useState("json");
+  const [convertTo, setConvertTo] = useState("JSON");
+  const [convertFrom, setConvertFrom] = useState("JSON");
 
   const [code, setCode] = useState(`{
   "a": 1,
@@ -54,8 +33,10 @@ export default function Home() {
   let text = "";
 
   try {
+    // console.log(convertFrom, converters, convertTo);
     const json = converters[convertFrom].parse(code) as object;
 
+    // console.log(converters, convertFrom, converters[convertFrom]);
     text = converters[convertTo].stringify(json) as string;
   } catch (err) {
     text = (err as SyntaxError).message;
@@ -69,11 +50,10 @@ export default function Home() {
             <SelectValue placeholder="Convert from" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="json">JSON</SelectItem>
-            <SelectItem value="yaml">YAML</SelectItem>
-            <SelectItem value="toml">TOML</SelectItem>
-            <SelectItem value="xml">XML</SelectItem>
-            <SelectItem value="csv">CSV</SelectItem>
+            <SelectItem value="JSON">JSON</SelectItem>
+            <SelectItem value="YAML">YAML</SelectItem>
+            <SelectItem value="TOML">TOML</SelectItem>
+            <SelectItem value="CSV">CSV</SelectItem>
           </SelectContent>
         </Select>
         Convert to
@@ -82,11 +62,11 @@ export default function Home() {
             <SelectValue placeholder="Convert to" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="json">JSON</SelectItem>
-            <SelectItem value="yaml">YAML</SelectItem>
-            <SelectItem value="toml">TOML</SelectItem>
-            <SelectItem value="xml">XML</SelectItem>
-            <SelectItem value="csv">CSV</SelectItem>
+            <SelectItem value="JSON">JSON</SelectItem>
+            <SelectItem value="YAML">YAML</SelectItem>
+            <SelectItem value="TOML">TOML</SelectItem>
+            <SelectItem value="NIX">NIX</SelectItem>
+            <SelectItem value="CSV">CSV</SelectItem>
           </SelectContent>
         </Select>
       </div>
