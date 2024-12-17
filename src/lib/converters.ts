@@ -1,59 +1,60 @@
 import YAML from "yaml";
 import TOML from "smol-toml";
+import INI from "ini";
+import { parse as xmlParser } from "js2xmlparser";
+import xml2json from "@hendt/xml2json";
+// @ts-expect-error
+import { parse as env2json, stringify as json2env } from "envfile";
 import { csv2json, json2csv } from "json-2-csv";
+import { json2nix } from "./nix";
+import { markdownTable } from "markdown-table";
+import {
+  parseEDNString,
+  toEDNString,
+  toEDNStringFromSimpleObject,
+} from "edn-data";
 
 type Parser = (a: string) => object;
 type Stringifier = (c: unknown) => string;
 type Converter = { parse: Parser; stringify: Stringifier };
 
-const CSV = {
-  parse: csv2json,
-  stringify: json2csv as Stringifier,
-};
-
-function json2nix(json: unknown, level: number = 1): string {
-  const ONE_INDENT = "  ";
-
-  const indent_level = ONE_INDENT.repeat(level);
-  const sub_indent_level = indent_level.slice(0, -ONE_INDENT.length);
-
-  if (
-    typeof json === "string" ||
-    typeof json === "number" ||
-    json === null ||
-    typeof json === "boolean"
-  )
-    return JSON.stringify(json);
-  else if (Array.isArray(json)) {
-    return `[\n${json.map((item) => `${indent_level}${json2nix(item, level + 1)}`).join("\n")}\n${sub_indent_level}]`;
-  } else {
-    const attributeSet = Object.entries(json as object)
-      .map(([k, v]) => {
-        const validUnquotedNix = /^[\w'_-]*$/;
-
-        const key = validUnquotedNix.test(k) ? k : `"${k}"`;
-        const val = json2nix(v, level + 1);
-
-        return `${indent_level}${key} = ${val};\n`;
-      })
-      .join("");
-
-    return `{\n${attributeSet}${sub_indent_level}}`;
-  }
-}
-
-const NIX: Converter = {
-  stringify: json2nix,
-  parse: () => {
-    throw new Error("Need parser for Nix string -> Json");
-  },
-};
-
 export const converters: Record<string, Converter> = {
   YAML,
   TOML,
-  CSV,
-  NIX,
+  CSV: {
+    parse: csv2json,
+    stringify: json2csv as Stringifier,
+  },
+  NIX: {
+    stringify: json2nix,
+    parse: () => {
+      throw new Error("Need parser for Nix string -> Json");
+    },
+  },
+  INI,
+  XML: {
+    stringify: (c) => xmlParser("object", c),
+    parse: xml2json,
+  },
+  ENV: {
+    stringify: json2env,
+    parse: env2json,
+  },
+  "MARKDOWN TABLE": {
+    // TODO: smarter parser for objects
+    // examples:
+    // Array<primitive> => List
+    // Nested object => Nested markdown tables
+    stringify: (c) => markdownTable(Object.entries(c as object)),
+    parse: () => {
+      throw new Error("Need parser for Markdown Table -> Json");
+    },
+  },
+  EDN: {
+    stringify: (c) =>
+      toEDNStringFromSimpleObject(c as any, { keysAs: "keyword" }),
+    parse: (c) => parseEDNString(c) as any,
+  },
   JSON: {
     parse: JSON.parse,
     stringify: (c: unknown) => JSON.stringify(c, null, 2),

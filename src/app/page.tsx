@@ -53,7 +53,11 @@ export default function Home() {
             <SelectItem value="JSON">JSON</SelectItem>
             <SelectItem value="YAML">YAML</SelectItem>
             <SelectItem value="TOML">TOML</SelectItem>
+            <SelectItem value="XML">XML</SelectItem>
+            <SelectItem value="ENV">ENV</SelectItem>
             <SelectItem value="CSV">CSV</SelectItem>
+            <SelectItem value="INI">INI</SelectItem>
+            <SelectItem value="EDN">EDN</SelectItem>
           </SelectContent>
         </Select>
         Convert to
@@ -67,6 +71,11 @@ export default function Home() {
             <SelectItem value="TOML">TOML</SelectItem>
             <SelectItem value="NIX">NIX</SelectItem>
             <SelectItem value="CSV">CSV</SelectItem>
+            <SelectItem value="XML">XML</SelectItem>
+            <SelectItem value="ENV">ENV</SelectItem>
+            <SelectItem value="INI">INI</SelectItem>
+            <SelectItem value="MARKDOWN TABLE">MARKDOWN TABLE</SelectItem>
+            <SelectItem value="EDN">EDN</SelectItem>
           </SelectContent>
         </Select>
       </div>
